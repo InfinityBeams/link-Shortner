@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZenithLinkShortener — Shorten Your Links</title>
+  <meta name="description" content="ZenithLinkShortener — Create short, shareable links in seconds." />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    :root {
+      --bg: #070b14;
+      --card: rgba(17, 24, 39, 0.78);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f5f7ff;
+      --muted: #8d98ad;
+      --primary: #6d5dfc;
+      --primary-hover: #8173ff;
+      --success: #35d49a;
+    }
+    body {
+      min-height: 100vh;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(109, 93, 252, 0.16), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(42, 124, 255, 0.10), transparent 30%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+    .background-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+    }
+    header {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 750;
+      letter-spacing: -0.5px;
+      font-size: 18px;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #8173ff, #4c3de0);
+      box-shadow: 0 8px 28px rgba(109, 93, 252, 0.28);
+      font-size: 18px;
+    }
+    .header-badge {
+      color: #aeb8ca;
+      font-size: 12px;
+      padding: 8px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.025);
+    }
+    main {
+      width: min(900px, calc(100% - 40px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .hero {
+      text-align: center;
+      padding: 76px 0 42px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #a99fff;
+      background: rgba(109, 93, 252, 0.10);
+      border: 1px solid rgba(109, 93, 252, 0.20);
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+      margin-bottom: 23px;
+    }
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--success);
+    }
+    h1 {
+      font-size: clamp(38px, 6vw, 66px);
+      line-height: 1.05;
+      letter-spacing: -3px;
+      font-weight: 800;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    h1 span {
+      background: linear-gradient(100deg, #ffffff 15%, #a79cff 75%, #6d5dfc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+      max-width: 520px;
+      margin: 23px auto 0;
+    }
+    .shortener-card {
+      max-width: 760px;
+      margin: 10px auto 0;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      backdrop-filter: blur(22px);
+      box-shadow:
+        0 25px 80px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+    }
+    .input-row {
+      display: flex;
+      gap: 9px;
+    }
+    .url-input {
+      flex: 1;
+      min-width: 0;
+      height: 58px;
+      padding: 0 18px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,0.07);
+      outline: none;
+      background: rgba(0,0,0,0.20);
+      color: white;
+      font-size: 14px;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .url-input::placeholder {
+      color: #657087;
+    }
+    .url-input:focus {
+      border-color: rgba(109, 93, 252, 0.75);
+      box-shadow: 0 0 0 3px rgba(109, 93, 252, 0.10);
+    }
+    .shorten-btn {
+      height: 58px;
+      padding: 0 25px;
+      border: none;
+      border-radius: 13px;
+      color: white;
+      background: linear-gradient(135deg, #7566ff, #5545e7);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.2s, filter 0.2s;
+      box-shadow: 0 8px 25px rgba(109, 93, 252, 0.20);
+    }
+    .shorten-btn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+    .shorten-btn:active {
+      transform: translateY(0);
+    }
+    .shorten-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+    }
+    .result {
+      display: none;
+      margin-top: 10px;
+      padding: 15px;
+      border-radius: 14px;
+      background: rgba(53, 212, 154, 0.055);
+      border: 1px solid rgba(53, 212, 154, 0.16);
+      text-align: left;
+    }
+    .result.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+    .result-label {
+      font-size: 11px;
+      color: #7fbaa5;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .result-link {
+      flex: 1;
+      min-width: 0;
+      color: #dffff1;
+      font-size: 14px;
+      font-weight: 600;
+      word-break: break-all;
+      text-decoration: none;
+    }
+    .result-link:hover {
+      text-decoration: underline;
+    }
+    .copy-btn {
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      color: #d7e5df;
+      padding: 10px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 650;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.12);
+    }
+    .error {
+      display: none;
+      color: #ff9d9d;
+      font-size: 13px;
+      text-align: left;
+      padding: 12px 7px 3px;
+      line-height: 1.5;
+    }
+    .error.show {
+      display: block;
+    }
+    .helper {
+      color: #5f6b80;
+      font-size: 11px;
+      margin-top: 13px;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 760px;
+      margin: 55px auto 0;
+    }
+    .feature {
+      padding: 23px 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.018);
+      text-align: left;
+    }
+    .feature-icon {
+      width: 35px;
+      height: 35px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(109, 93, 252, 0.12);
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    .feature h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+    .feature p {
+      color: #758197;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    footer {
+      text-align: center;
+      padding: 70px 20px 30px;
+      color: #4f5b70;
+      font-size: 12px;
+    }
+    footer strong {
+      color: #78849a;
+      font-weight: 650;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @media (max-width: 620px) {
+      header {
+        width: calc(100% - 28px);
+        padding: 20px 0;
+      }
+      .header-badge {
+        display: none;
+      }
+      main {
+        width: calc(100% - 28px);
+      }
+      .hero {
+        padding: 58px 0 30px;
+      }
+      h1 {
+        letter-spacing: -1.8px;
+      }
+      .subtitle {
+        font-size: 14px;
+      }
+      .input-row {
+        flex-direction: column;
+      }
+      .url-input,
+      .shorten-btn {
+        width: 100%;
+      }
+      .shorten-btn {
+        height: 53px;
+      }
+      .url-input {
+        height: 53px;
+      }
+      .features {
+        grid-template-columns: 1fr;
+        margin-top: 38px;
+      }
+      .feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px;
+      }
+      .feature-icon {
+        flex-shrink: 0;
+        margin-bottom: 0;
+      }
+      .result-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .copy-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-grid"></div>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">↗</div>
+      <div>ZenithLinkShortener</div>
+    </div>
+    <div class="header-badge">Simple · Fast · Reliable</div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Link shortening made simple
+      </div>
+      <h1>Short links.<br /><span>Big possibilities.</span></h1>
+      <p class="subtitle">
+        Turn long, complicated URLs into short, shareable links in seconds.
+        Clean, simple, and ready to share.
+      </p>
+    </section>
+    <section class="shortener-card">
+      <div class="input-row">
+        <input
+          id="urlInput"
+          class="url-input"
+          type="url"
+          placeholder="Paste your long URL here..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="shortenBtn" class="shorten-btn">
+          Shorten Link ↗
+        </button>
+      </div>
+      <div id="error" class="error"></div>
+      <div id="result" class="result">
+        <div class="result-label">Your shortened link</div>
+        <div class="result-row">
+          <a id="resultLink" class="result-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+          <button id="copyBtn" class="copy-btn">Copy Link</button>
+        </div>
+      </div>
+      <div class="helper">Your original URL will be redirected through TinyURL.</div>
+    </section>
+    <section class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div>
+          <h3>Instant shortening</h3>
+          <p>Create a compact link in just a few seconds.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔗</div>
+        <div>
+          <h3>Easy to share</h3>
+          <p>Make long URLs cleaner for messages and social media.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡</div>
+        <div>
+          <h3>Trusted redirects</h3>
+          <p>Short links are handled through the TinyURL service.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    © 2026 <strong>ZenithLinkShortener</strong>. Built for simpler sharing.
+  </footer>
+  <script>
+    const urlInput = document.getElementById("urlInput");
+    const shortenBtn = document.getElementById("shortenBtn");
+    const result = document.getElementById("result");
+    const resultLink = document.getElementById("resultLink");
+    const copyBtn = document.getElementById("copyBtn");
+    const errorBox = document.getElementById("error");
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+    }
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.classList.remove("show");
+    }
+    function isValidUrl(value) {
+      try {
+        const url = new URL(value);
+        return url.protocol === "http:" || url.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }
+    async function shortenUrl() {
+      const longUrl = urlInput.value.trim();
+      clearError();
+      result.classList.remove("show");
+      if (!longUrl) {
+        showError("Please paste a URL first.");
+        return;
+      }
+      if (!isValidUrl(longUrl)) {
+        showError("Please enter a valid URL starting with https:// or http://");
+        return;
+      }
+      shortenBtn.disabled = true;
+      shortenBtn.textContent = "Shortening...";
+      try {
+        const response = await fetch("/.netlify/functions/shorten", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url: longUrl })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.shortUrl) {
+          throw new Error(data.error || "Unable to shorten this URL.");
+        }
+        resultLink.href = data.shortUrl;
+        resultLink.textContent = data.shortUrl;
+        result.classList.add("show");
+      } catch (error) {
+        showError(error.message || "Something went wrong. Please try again.");
+      } finally {
+        shortenBtn.disabled = false;
+        shortenBtn.textContent = "Shorten Link ↗";
+      }
+    }
+    shortenBtn.addEventListener("click", shortenUrl);
+    urlInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        shortenUrl();
+      }
+    });
+    copyBtn.addEventListener("click", async () => {
+      const link = resultLink.textContent;
+      try {
+        await navigator.clipboard.writeText(link);
+        copyBtn.textContent = "Copied ✓";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy Link";
+        }, 1800);
+      } catch {
+        showError("Could not copy automatically. Please copy the link manually.");
+      }
+    });
+  </script>
+</body>
+</html>
